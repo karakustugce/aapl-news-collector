@@ -1,0 +1,36 @@
+{
+ "articles": [
+  {
+   "url": "https://www.reuters.com/tech/apple-iphone-17?utm_source=tw",
+   "title": "Apple iPhone 17 demand beats estimates",
+   "seendate": "20261024T140505Z",
+   "domain": "reuters.com",
+   "language": "English",
+   "sourcecountry": "United States"
+  },
+  {
+   "url": "https://www.cnbc.com/apple-iphone",
+   "title": "Apple iPhone 17 demand beats estimates - CNBC",
+   "seendate": "20261022T150505Z",
+   "domain": "cnbc.com",
+   "language": "English",
+   "sourcecountry": "United States"
+  },
+  {
+   "url": "https://food.com/apple-pie",
+   "title": "Best apple pie recipe for fall",
+   "seendate": "20261024T143505Z",
+   "domain": "food.com",
+   "language": "English",
+   "sourcecountry": "United States"
+  },
+  {
+   "url": "https://example.com/a",
+   "title": "Apple shares slip as markets wobble",
+   "seendate": "20261024T145505Z",
+   "domain": "example.com",
+   "language": "English",
+   "sourcecountry": "United States"
+  }
+ ]
+}

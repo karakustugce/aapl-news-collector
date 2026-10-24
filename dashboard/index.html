@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AAPL News Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4f1ea; --ink:#16130f; --muted:#6f685d; --rule:#d8d2c5; --card:#fbf9f4;
+    --pos:#2f6b4f; --neg:#a8392b; --accent:#16130f; --warn:#9a6a12;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --paper:#14130f; --ink:#ece7dc; --muted:#9a9284; --rule:#2e2b25; --card:#1b1915;
+           --pos:#6fb38e; --neg:#e07a68; --accent:#ece7dc; --warn:#d9a441; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 "Inter Tight",system-ui,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px}
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:14px}
+  h1{font:600 clamp(30px,5vw,46px)/1 "Newsreader",serif;margin:0;letter-spacing:-.01em}
+  .kicker{font:500 11px/1 "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .status{font:400 12px/1.4 "IBM Plex Mono",monospace;color:var(--muted);text-align:right}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:1px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--rule)}
+  .kpi{padding:18px 16px 16px 0;border-right:1px solid var(--rule)}
+  .kpi+.kpi{padding-left:16px}.kpi:last-child{border-right:0}
+  .kpi b{display:block;font:400 34px/1 "Newsreader",serif}
+  .kpi > span{font:500 11px/1 "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  section{margin-top:34px}
+  h2{font:600 20px/1.2 "Newsreader",serif;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+  .grid{display:grid;grid-template-columns:2fr 1fr;gap:34px}
+  svg text{font:400 10px "IBM Plex Mono",monospace;fill:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{font:500 10.5px/1 "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--ink)}
+  td{padding:8px 6px;border-bottom:1px solid var(--rule);vertical-align:top}
+  td.num{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:12px}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+  .chip{font:500 11px/1 "IBM Plex Mono",monospace;padding:7px 10px;border:1px solid var(--rule);background:transparent;color:var(--ink);border-radius:999px;cursor:pointer}
+  .chip[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .feed article{display:grid;grid-template-columns:92px 1fr auto;gap:14px;padding:12px 0;border-bottom:1px solid var(--rule)}
+  .feed time{font:400 11px/1.4 "IBM Plex Mono",monospace;color:var(--muted)}
+  .feed a{color:var(--ink);text-decoration:none;font:400 17px/1.3 "Newsreader",serif}
+  .feed a:hover{text-decoration:underline;text-underline-offset:3px}
+  .meta{font:400 11px/1.6 "IBM Plex Mono",monospace;color:var(--muted);margin-top:3px}
+  .tag{display:inline-block;padding:1px 6px;border:1px solid var(--rule);border-radius:3px;margin-right:4px}
+  .sent{font:500 12px "IBM Plex Mono",monospace;white-space:nowrap}
+  .pos{color:var(--pos)}.neg{color:var(--neg)}.warn{color:var(--warn)}
+  .empty{padding:28px 0;color:var(--muted);font-style:italic;font-family:"Newsreader",serif;font-size:17px}
+  footer{margin-top:50px;color:var(--muted);font-size:12px;border-top:1px solid var(--rule);padding-top:14px}
+  @media (max-width:820px){
+    .grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}
+    .kpi:nth-child(2){border-right:0}.kpi:nth-child(3){padding-left:0}
+    .kpi:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+    .feed article{grid-template-columns:1fr}.status{text-align:left}
+    header{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="kicker">Grid Feature Engineering · news collector</div>
+      <h1>AAPL News Desk</h1>
+    </div>
+    <div class="status" id="status">loading…</div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><b id="k-stories">–</b><span>Stories today (NY)</span></div>
+    <div class="kpi"><b id="k-items">–</b><span>Items, last 24h</span></div>
+    <div class="kpi"><b id="k-labeled">–</b><span>Agent-labeled</span></div>
+    <div class="kpi"><b id="k-sent">–</b><span>Avg tone today</span></div>
+  </div>
+
+  <section class="grid">
+    <div>
+      <h2>Story flow</h2>
+      <p class="sub">Unique stories per New York day, last 30 days. Line: average agent tone (−1 to 1).</p>
+      <div id="chart"></div>
+    </div>
+    <div>
+      <h2>Sources</h2>
+      <p class="sub">Rows stored, by relevance rule.</p>
+      <table id="mix"><thead><tr><th>Source</th><th class="num">Primary/Strong</th><th class="num">Weak</th><th class="num">Reject</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Latest items</h2>
+    <p class="sub">Newest first by the time the item became usable for the model.</p>
+    <div class="filters" id="filters"></div>
+    <div class="feed" id="feed"></div>
+  </section>
+
+  <section>
+    <h2>Run log</h2>
+    <p class="sub">Every collection run, including partial failures.</p>
+    <table id="runs"><thead><tr><th>Started (UTC)</th><th>Status</th><th class="num">Returned</th><th class="num">New</th><th class="num">Dup</th><th class="num">Labeled</th><th>Failed sources</th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <footer>Data: GDELT, Google News, Apple Newsroom, SEC EDGAR. Collected every 30 minutes by GitHub Actions into Supabase. Research use only; not investment advice.</footer>
+</div>
+
+<script>
+const SUPABASE_URL = "https://zrqquefqdzdqnflirowm.supabase.co";
+const KEY = "sb_publishable_4993_ZaGw10laI3qei1STQ_AZl4XH-N";   // publishable: read-only views
+const get = (view, q = "") => fetch(`${SUPABASE_URL}/rest/v1/${view}?${q}`, { headers: { apikey: KEY } })
+  .then(r => r.ok ? r.json() : Promise.reject(new Error(`${view}: ${r.status}`)));
+
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const nyDate = d => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(d);
+const fmtTime = iso => {
+  const d = new Date(iso);
+  return new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", month: "short", day: "numeric" }).format(d)
+    + "<br>" + new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit", hour12: false }).format(d) + " ET";
+};
+const sentCell = s => s == null ? "" : `<span class="sent ${s > 0.2 ? "pos" : s < -0.2 ? "neg" : ""}">${s > 0 ? "+" : ""}${Number(s).toFixed(2)}</span>`;
+
+let FEED = [], filter = "all";
+
+function drawChart(daily) {
+  const el = document.getElementById("chart");
+  const days = [...Array(30)].map((_, i) => nyDate(new Date(Date.now() - (29 - i) * 864e5)));
+  const by = Object.fromEntries(daily.map(d => [d.ny_date, d]));
+  const vals = days.map(d => by[d]?.stories ?? 0);
+  const sents = days.map(d => by[d]?.avg_sentiment);
+  const W = 700, H = 220, P = { l: 28, r: 28, t: 12, b: 26 };
+  const max = Math.max(5, ...vals), bw = (W - P.l - P.r) / days.length;
+  const y = v => H - P.b - (v / max) * (H - P.t - P.b);
+  const ys = s => P.t + (1 - (s + 1) / 2) * (H - P.t - P.b);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Stories per day">`;
+  [0, 0.5, 1].forEach(f => { const v = Math.round(max * f); svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${P.l - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`; });
+  vals.forEach((v, i) => {
+    const x = P.l + i * bw + 2;
+    svg += `<rect x="${x}" y="${y(v)}" width="${bw - 4}" height="${H - P.b - y(v)}" fill="var(--ink)" opacity="${i === 29 ? 1 : 0.78}"><title>${days[i]}: ${v} stories</title></rect>`;
+    if (i % 5 === 4 || i === 29) svg += `<text x="${x + (bw - 4) / 2}" y="${H - 8}" text-anchor="middle">${days[i].slice(5)}</text>`;
+  });
+  const pts = sents.map((s, i) => s == null ? null : `${P.l + i * bw + bw / 2},${ys(Number(s))}`).filter(Boolean);
+  if (pts.length > 1) svg += `<polyline points="${pts.join(" ")}" fill="none" stroke="var(--neg)" stroke-width="1.6"/>`;
+  svg += `<text x="${W - P.r + 6}" y="${ys(1) + 3}">+1</text><text x="${W - P.r + 6}" y="${ys(-1) + 3}">−1</text></svg>`;
+  el.innerHTML = svg;
+}
+
+function drawFeed() {
+  const rows = FEED.filter(r => filter === "all" || r.source === filter || (filter === "negative" && r.sentiment < -0.2));
+  document.getElementById("feed").innerHTML = rows.length ? rows.slice(0, 150).map(r => `
+    <article>
+      <time>${fmtTime(r.available_at_utc)}</time>
+      <div>
+        <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>
+        <div class="meta"><span class="tag">${esc(r.source)}</span>${esc(r.source_domain || "")}
+          ${r.event_type ? ` · ${esc(r.event_type.replace("_", " "))}` : ""}
+          ${r.relevance_rule === "weak" ? ` · <span class="warn">weak match</span>` : ""}
+          ${r.availability_basis !== "observed" ? ` · backfill` : ""}</div>
+      </div>
+      ${sentCell(r.sentiment)}
+    </article>`).join("") : `<div class="empty">Nothing here yet. The first scheduled run fills this list.</div>`;
+}
+
+function drawFilters() {
+  const opts = ["all", "gdelt", "google_news", "apple_newsroom", "sec_edgar", "negative"];
+  document.getElementById("filters").innerHTML = opts.map(o =>
+    `<button class="chip" aria-pressed="${o === filter}" data-f="${o}">${o.replace("_", " ")}</button>`).join("");
+  document.querySelectorAll(".chip").forEach(b => b.onclick = () => { filter = b.dataset.f; drawFilters(); drawFeed(); });
+}
+
+async function load() {
+  try {
+    const [feed, daily, mix, runs] = await Promise.all([
+      get("aapl_feed", "select=*&limit=500"), get("aapl_daily", "select=*&limit=60"),
+      get("aapl_source_mix", "select=*"), get("aapl_runs_recent", "select=*&limit=30")]);
+    FEED = feed;
+    const today = daily.find(d => d.ny_date === nyDate(new Date()));
+    document.getElementById("k-stories").textContent = today?.stories ?? 0;
+    document.getElementById("k-items").textContent = feed.filter(r => Date.now() - new Date(r.available_at_utc) < 864e5).length;
+    const lab = feed.filter(r => r.sentiment != null).length;
+    document.getElementById("k-labeled").textContent = feed.length ? Math.round(100 * lab / feed.length) + "%" : "–";
+    const s = today?.avg_sentiment;
+    document.getElementById("k-sent").innerHTML = s == null ? "–" : `<span class="${s > 0.1 ? "pos" : s < -0.1 ? "neg" : ""}">${s > 0 ? "+" : ""}${Number(s).toFixed(2)}</span>`;
+
+    const last = runs[0];
+    const color = !last ? "var(--muted)" : last.status === "ok" ? "var(--pos)" : last.status === "partial" ? "var(--warn)" : "var(--neg)";
+    document.getElementById("status").innerHTML = last
+      ? `<span class="dot" style="background:${color}"></span>last run ${esc(last.status)} · ${new Date(last.started_at_utc).toLocaleString()}<br>${esc(last.n_new)} new · ${esc(last.n_returned)} returned`
+      : "no runs yet";
+
+    drawChart(daily);
+    const agg = {};
+    mix.forEach(m => { agg[m.source] = agg[m.source] || { ps: 0, weak: 0, reject: 0 };
+      agg[m.source][m.relevance_rule === "weak" ? "weak" : m.relevance_rule === "reject" ? "reject" : "ps"] += m.items; });
+    document.querySelector("#mix tbody").innerHTML = Object.entries(agg).map(([k, v]) =>
+      `<tr><td>${esc(k)}</td><td class="num">${v.ps}</td><td class="num">${v.weak}</td><td class="num">${v.reject}</td></tr>`).join("")
+      || `<tr><td colspan="4" class="empty">No rows yet.</td></tr>`;
+    document.querySelector("#runs tbody").innerHTML = runs.map(r => {
+      const failed = Object.entries(r.sources || {}).filter(([, v]) => v.failed).map(([k]) => k).join(", ");
+      const cls = r.status === "ok" ? "pos" : r.status === "partial" ? "warn" : "neg";
+      return `<tr><td class="num" style="text-align:left">${esc(r.started_at_utc.slice(0, 16).replace("T", " "))}</td>
+        <td class="${cls}">${esc(r.status)}</td><td class="num">${r.n_returned}</td><td class="num">${r.n_new}</td>
+        <td class="num">${r.n_duplicate}</td><td class="num">${r.n_labeled}</td><td>${esc(failed || r.error || "")}</td></tr>`;
+    }).join("") || `<tr><td colspan="7" class="empty">No runs yet.</td></tr>`;
+    drawFilters(); drawFeed();
+  } catch (e) {
+    document.getElementById("status").innerHTML = `<span class="neg">could not load data: ${esc(e.message)}</span>`;
+  }
+}
+load();
+setInterval(load, 5 * 60 * 1000);
+</script>
+</body>
+</html>
