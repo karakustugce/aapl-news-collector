@@ -44,9 +44,17 @@ def main(argv=None):
             print(f"{r['source']:14s} {r['relevance_rule']:7s} {r['availability_basis']:28s} {r['title'][:70]}")
         return
 
+    missing = [k for k in ("SUPABASE_URL", "SUPABASE_SERVICE_KEY") if not os.environ.get(k, "").strip()]
+    if missing:
+        print(json.dumps(report))
+        raise SystemExit(f"Missing GitHub secret(s): {', '.join(missing)}. "
+                         "Add them under Settings -> Secrets and variables -> Actions.")
     from .store import Store
-    store = Store()
-    store.start_run({k: run[k] for k in ("run_id", "query_version", "started_at_utc")})
+    store = Store(os.environ["SUPABASE_URL"].strip(), os.environ["SUPABASE_SERVICE_KEY"].strip())
+    try:
+        store.start_run({k: run[k] for k in ("run_id", "query_version", "started_at_utc")})
+    except Exception as e:  # noqa: BLE001
+        raise SystemExit(f"Could not reach Supabase with the given URL/key: {e}")
     status, err, new, dup, n_lab = "ok", None, 0, 0, 0
     try:
         new, dup = store.ingest(rows)
